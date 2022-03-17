@@ -1,4 +1,4 @@
-javascript:void((()=>{
+void((()=>{
   const doc = document.documentElement;
   const dForm = `<form class="dform" method="post" action="/sw_web/blc201/blc201g003" target="dframe">
   <input type="hidden" name="kyokyuKanriNum" value=""/>

@@ -39,7 +39,7 @@
     async function setBookmarklet(aEl){
       const href = aEl.getAttribute('href')
       const scr = await fetch(href).then(r=>r.text())
-      aEl.setAttribute('href', encodeURIComponent(scr))
+      aEl.setAttribute('href', 'javascript:' + encodeURIComponent(scr))
       aEl.classList.remove('hide')
     }
   </script>
