@@ -6,6 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>M's messy tools</title>
   <style>
+    body{
+      font-family:"Helvetica Neue",Helvetica,Arial,sans-serif
+    }
+    h1{
+      border-bottom:solid 1px gray;
+    }
+    h2{
+      border-bottom:solid 1px gray;
+    }
     .hide{
       display:none;
     }
@@ -15,7 +24,8 @@
   </style>
 </head>
 <body>
-  <h1>Download tools クリックでダウンロード</h1>
+  <h1>M's いろいろツール</h1>
+  <h2>Download tools クリックでダウンロード</h2>
   <ul>
     <li>
       <div class="desc">BOMなしUTF-8のCSVをBOMをつけて一時ファイルとしてExcelで開く</div>
@@ -24,7 +34,7 @@
       <a href="download/mConverterEx.js" class="download" download="mConverterEx.js">mConverterEx.js</a>
     </li>
   </ul>
-  <h1>Bookmarklet リンクを右クリックからお気に入り、もしくはD&amp;Dでブックマークバーへ</h1>
+  <h2>Bookmarklet D&amp;Dでブックマークバーへ</h2>
   <ul>
     <li>
       <div class="desc">
@@ -37,6 +47,9 @@
     document.querySelectorAll('.bookmarklet')
       .forEach(setBookmarklet)
     async function setBookmarklet(aEl){
+      aEl.addEventListener('click', e=>{
+        e.preventDefault()
+      })
       const href = aEl.getAttribute('href')
       const scr = await fetch(href).then(r=>r.text())
       aEl.setAttribute('href', 'javascript:' + encodeURIComponent(scr))
