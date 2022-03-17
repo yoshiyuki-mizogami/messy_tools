@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M's messy tools</title>
+  <style>
+    .hide{
+      display:none;
+    }
+    ul{
+      list-style: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Download tools クリックでダウンロード</h1>
+  <ul>
+    <li>
+      <div class="desc">BOMなしUTF-8のCSVをBOMをつけて一時ファイルとしてExcelで開く</div>
+      <a href="download/mConverter.js" class="download" download="mConverter.js">mConverter.js</a>
+      <div class="desc">BOMなしUTF-8のCSVをBOMをつけて一時ファイルとしてExcelで開き、ついでにN番号を抽出する</div>
+      <a href="download/mConverterEx.js" class="download" download="mConverterEx.js">mConverterEx.js</a>
+    </li>
+  </ul>
+  <h1>Bookmarklet リンクを右クリックからお気に入り、もしくはD&amp;Dでブックマークバーへ</h1>
+  <ul>
+    <li>
+      <div class="desc">
+        OCCTOデータ抽出ツール
+      </div>
+      <a href="bookmarklet/occto-downloader.js" class="bookmarklet hide">OCCTOdownloader</a>
+    </li>
+  </ul>
+  <script>
+    document.querySelectorAll('.bookmarklet')
+      .forEach(setBookmarklet)
+    async function setBookmarklet(aEl){
+      const href = aEl.getAttribute('href')
+      const scr = await fetch(href).then(r=>r.text())
+      aEl.setAttribute('href', encodeURIComponent(scr))
+      aEl.classList.remove('hide')
+    }
+  </script>
+</body>
+</html>
