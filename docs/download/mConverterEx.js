@@ -24,7 +24,7 @@ function extractNNum(lines){
   lines[0] = 'Nno,' + lines[0];
   for(var i = 1; i < lines.length;i++){
     var line = lines[i]
-    var m = line.match(/N\d{9}/)
+    var m = line.match(/\bN\d{9}/)
     var n = ''
     if(m){
       n = m[0]
