@@ -5,12 +5,12 @@ var ado = new ActiveXObject('ADODB.Stream');
 var arg = WScript.arguments
 function main(){
   if(arg.count() === 0){
-   alert('csvファイルをドロップしてください')
+   alert('csv file drop me.')
    return
   }
   var csvFile = arg(0);
   if(!/\.csv$/i.test(csvFile)){
-     return alert('csvファイルではありません');
+     return alert('invalid csv file.');
   }
   var txt  = readFileText(csvFile);
   var converted = extractNNum(txt.split(/\r?\n/));
