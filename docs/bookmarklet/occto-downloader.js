@@ -1,5 +1,5 @@
 void((()=>{
-  const version = '0.0.3';
+  const version = '0.0.4';
   const spnName = '供給地点特定番号';
   class BaseDownloader{
     host = '';
@@ -63,6 +63,7 @@ void((()=>{
             console.error(e);
             results.push({[spnName]:[`${l} ${e}`]});
           }
+          await wait(1000);
           progress.textContent = `${ind+1}/${total}`;
         }, Promise.resolve());
         await instance.createCsv(results);
