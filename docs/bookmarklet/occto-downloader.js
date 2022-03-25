@@ -1,23 +1,102 @@
 void((()=>{
-  const den03 = {
-    host:'ap00.www6.tepco.co.jp',
+  const version = '0.0.3';
+  const spnName = '供給地点特定番号';
+  class BaseDownloader{
+    host = '';
+    createCsv(data){
+      const header = Object.keys(data[0]);
+      const headerLine = header.join(',');
+      const csvLines = data.map(d=>{
+        return header.map(h=>{
+          const field = d[h];
+          if(!field){
+            return '';
+          }
+          return field.map(d=>d.trim()).filter(Boolean).join(' ')
+        }).join(',');
+      });
+      csvLines.unshift(headerLine);
+      this.download(csvLines);
+    }
+    download(lines){
+      const blob = new Blob(['\uFEFF', lines.join('\r\n')],{type:'application/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `OCCTO地点データ_${this.name}.csv`;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 3000);
+    }
+    createCustomUI(formText){
+      document.documentElement.innerHTML = `<div style="vertical-align:top;display:inline-block;width:45%"><div>OCCTO Auto downloader Console ver ${version}</div>
+        ${formText}
+        <div style="text-align:center">
+          <textarea class="input" style="display:block;resize:none;width:80%;height:70vh" placeholder="地点番号リスト"></textarea>
+          <button class="start">取得開始</button>
+          <div class="progress"></div>
+        </div>
+        </div><iframe name="dframe" style="width:50%;height:80vh;display:inline-block;" src="${location.href}"></iframe>`;
+        return document.querySelector('#form'); 
+    }
+    start(){
+      this.createForm();
+      const ta = document.querySelector('.input');
+      const btn = document.querySelector('.start');
+      btn.addEventListener('click', async()=>{
+        const progress = document.querySelector('.progress');
+        const results = [];
+        const lines = ta.value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+        const invalids = lines.filter(l=>!/^\d{22}$/.test(l));
+        if(invalids.length){
+          return alert('22桁の半角数値ではないデータが紛れています\n' + invalids.join('\r\n'));
+        }
+        ta.setAttribute('disabled', true);
+        btn.setAttribute('disabled', true);
+        const total = lines.length;
+        progress.textContent = `0/${total}`;
+        await lines.reduce(async (before, l, ind)=>{
+          await before;
+          try{
+            await instance.switchPage(l)
+            results.push(instance.getInfo());
+          }catch(e){
+            console.error(e);
+            results.push({[spnName]:[`${l} ${e}`]});
+          }
+          progress.textContent = `${ind+1}/${total}`;
+        }, Promise.resolve());
+        await instance.createCsv(results);
+        ta.removeAttribute('disabled');
+        btn.removeAttribute('disabled');
+      });
+    }
+  }
+  class Den03 extends BaseDownloader{
+    name = '東京電力';
+    host = 'ap00.www6.tepco.co.jp'
     createForm(){
-
-    },
+      const orgForm = document.querySelector('#form');
+      if(!orgForm){
+        throw '元フォームが存在しません、東京の支援トップ画面で実行してください';
+      }
+      const orgFormText = orgForm.outerHTML;
+      this.form = this.createCustomUI(orgFormText);
+    }
     getInfo(){
 
-    },
+    }
     async getNo(){
 
-    },
+    }
     async switchPage(n){
 
     }
-  }
-  const den09 = {
-    host:'sw-www.network.kyuden.co.jp',
+  };
+  class Den09 extends BaseDownloader {
+    name = '九州電力';
+    host = 'sw-www.network.kyuden.co.jp'
     createForm(){
-      const dForm = `<form class="dform" method="post" action="/sw_web/blc201/blc201g003" target="dframe">
+      const dForm = `<form id="form" method="post" action="/sw_web/blc201/blc201g003" target="dframe">
       <input type="hidden" name="kyokyuKanriNum" value=""/>
       <input type="hidden" name="callback" value="blc101/blc101g001/setValueFromSession'"/>
       <input type="hidden" name="chitenId" value=""/>
@@ -25,16 +104,8 @@ void((()=>{
       <input type="hidden" name="kouriCd" value=""/>
       <input type="hidden" name="buttonId" value="usageInfoInquiryBusinessButton1"/>
     </form>`;
-      doc.innerHTML = `<div style="vertical-align:top;display:inline-block;width:45%">OCCTO Auto downloader Console
-      ${dForm}
-      <div style="text-align:center">
-        <textarea class="input" style="display:block;resize:none;width:80%;height:70vh" placeholder="地点番号リスト"></textarea>
-        <button class="start">取得開始</button>
-        <div class="progress"></div>
-      </div>
-      </div><iframe name="dframe" style="width:50%;height:80vh;display:inline-block;" src="${location.href}"></iframe>`;
-      this.form = doc.querySelector('.dform');
-    },
+      this.form = this.createCustomUI(dForm)
+    }
     getInfo(){
       const ifdoc = document.querySelector('iframe').contentWindow.document;
       const tdAndTh= Array.from(ifdoc.querySelector('.main-table').querySelectorAll('th,td'));
@@ -51,9 +122,9 @@ void((()=>{
           dataset[lastProp].push(el.textContent.replace(/\s/g, ''));
         }
       });
-      dataset['供給地点特定番号'] = [`="${dataset['供給地点特定番号'][0]}"`];
+      dataset[spnName] = [`="${dataset[spnName][0]}"`];
       return dataset;
-    },
+    }
     getNo(){
       try{
         const ifdoc = document.querySelector('iframe').contentWindow.document;
@@ -62,7 +133,16 @@ void((()=>{
       }catch(e){
          return ''
       }
-    },
+    }
+    detectError(){
+      const ifdoc = document.querySelector('iframe').contentWindow.document;
+      const errorBox = ifdoc.querySelector('.imui-box-error-inner.inner-error');
+      const detect = !!errorBox;
+      if(detect){
+        errorBox.parentNode.removeChild(errorBox);
+      }
+      return detect;
+    }
     async switchPage(n){
       this.form.querySelector('[name=kyokyuKanriNum]').value = 
       this.form.querySelector('[name=chitenId]').value = n;
@@ -71,69 +151,27 @@ void((()=>{
         if(this.getNo() === n){
           return;
         }
+        if(this.detectError()){
+          throw 'Not found';
+        }
         await wait(1000);
       }
     }
-  }
-  let type = null;
+  };
+  let instance = null;
   const currentUrl = location.href
-  if(currentUrl.includes(den03.host)){
-    type = den03;
-  }else if(currentUrl.includes(den09.host)){
-    type = den09;
+  if(currentUrl.includes('ap00.www6.tepco.co.jp')){
+    instance = new Den03()
+  }else if(currentUrl.includes('sw-www.network.kyuden.co.jp')){
+    instance = new Den09()
   }
-  if(type === null){
+  if(instance === null){
     alert('OCCTOの各エリア別ページで実行してください。')
     return;
   }
-  const doc = document.documentElement;
-  type.createForm();
-  const ta = doc.querySelector('.input');
-  const btn = doc.querySelector('.start');
-  btn.addEventListener('click', async()=>{
-    ta.setAttribute('disabled', true);
-    btn.setAttribute('disabled', true);
-    const progress = doc.querySelector('.progress');
-    const results = [];
-    const lines = ta.value.split(/\r?\n/).filter(l=>/^\d{22}$/.test(l));
-    const total = lines.length;
-    progress.textContent = `0/${total}`;
-    await lines.reduce(async (before, l, ind)=>{
-      await before;
-      await type.switchPage(l);
-      results.push(type.getInfo());
-      progress.textContent = `${ind+1}/${total}`;
-    }, Promise.resolve());
-    await createCsv(results);
-    ta.removeAttribute('disabled');
-    btn.removeAttribute('disabled');
-  });
+  instance.start();
   /*util funcs*/
   function wait(n){
     return new Promise(r=>setTimeout(r, n));
   }
-
-  function createCsv(data){
-     const header = Object.keys(data[0]);
-     const headerLine = header.join(',');
-     const csvLines = data.map(d=>{
-       return header.map(h=>{
-         return d[h].map(d=>d.trim()).filter(Boolean).join(' ')
-       }).join(',');
-     });
-     csvLines.unshift(headerLine);
-     download(csvLines);
-  }
-  function download(lines){
-    const blob = new Blob(['\uFEFF', lines.join('\r\n')],{type:'application/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'OCCTO地点データ.csv';
-    a.click();
-    setTimeout(()=>{
-      URL.revokeObjectURL(url);
-    }, 3000)
-  }
-
 })())
