@@ -4,8 +4,9 @@
   "parserOptions": {
     "ecmaVersion": "latest"
   },
-  "env": {"browser": true},
+  "env": {"browser": true, "es6": true},
   "rules": {
+    "no-constant-condition":"off",
     "semi":2
   }
 }

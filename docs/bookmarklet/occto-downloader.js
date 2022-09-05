@@ -31,7 +31,7 @@ void(!function(){
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `OCCTO地点データ_${this.name}.csv`;
+      a.download = `${now()}_OCCTO地点データ_${this.name}.csv`;
       a.click();
       setTimeout(()=>URL.revokeObjectURL(url), 3000);
     }
@@ -240,7 +240,7 @@ void(!function(){
         }
       }catch(e){console.error('onclickBack not found');}
     }
-  };
+  }
   class Den09 extends BaseDownloader {
     constructor(){
       super('Kyushu');
@@ -334,4 +334,11 @@ void(!function(){
   function wait(n){
     return new Promise(r=>setTimeout(r, n));
   }
-}())
+  function now(){
+    const d = new Date();
+    return `${d.getFullYear()}-${pad0(d.getMonth() + 1)}-${pad0(d.getDate())}_${pad0(d.getHours())}${pad0(d.getMinutes())}}${pad0(d.getSeconds())}}`;
+  }
+  function pad0(n){
+    return ('' + n).padStart(2, '0');
+  }
+}());
