@@ -48,7 +48,7 @@
       <div class="desc">
         OCCTOデータ抽出ツール
       </div>
-      <a href="bookmarklet/occto-downloader.js" class="bookmarklet hide">OCCTOdownloader ver 0.5.0</a>
+      <a href="bookmarklet/occto-downloader.js" class="bookmarklet hide">OCCTOdownloader</a>
     </li>
   </ul>
   <script>
@@ -60,6 +60,8 @@
       })
       const href = aEl.getAttribute('href')
       const scr = await fetch(href).then(r=>r.text())
+      const version = scr.match(/version = '([\d.]+)'/)[1];
+      aEl.textContent += ` ver ${version}`;
       aEl.setAttribute('href', 'javascript:' + encodeURIComponent(scr))
       aEl.classList.remove('hide')
     }

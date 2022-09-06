@@ -1,5 +1,5 @@
 void(!function(){
-  const version = '0.5.0';
+  const version = '0.5.1';
   const spnName = '供給地点特定番号';
   const FAILED_LIMIT = 25;
 
@@ -336,7 +336,7 @@ void(!function(){
   }
   function now(){
     const d = new Date();
-    return `${d.getFullYear()}-${pad0(d.getMonth() + 1)}-${pad0(d.getDate())}_${pad0(d.getHours())}${pad0(d.getMinutes())}}${pad0(d.getSeconds())}}`;
+    return `${d.getFullYear()}-${pad0(d.getMonth() + 1)}-${pad0(d.getDate())}_${pad0(d.getHours())}${pad0(d.getMinutes())}${pad0(d.getSeconds())}`;
   }
   function pad0(n){
     return ('' + n).padStart(2, '0');
